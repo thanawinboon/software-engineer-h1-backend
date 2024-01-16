@@ -10,9 +10,9 @@ from passlib.context import CryptContext
 
 # https://youtu.be/xZnOoO3ImSY?si=PSMb6FIW5YB39Dra
 class AuthHandler():
+    security = HTTPBearer()
     def __init__(self):
         load_dotenv()
-        self.security = HTTPBearer()
         self.secret_key = os.environ.get("SECRET_KEY", "secret_12340987")
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         self.algorithm = os.environ.get("ALGORITHM", "HS256")
