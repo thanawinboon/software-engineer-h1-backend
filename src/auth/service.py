@@ -6,7 +6,12 @@ from dotenv import load_dotenv
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from sqlmodel import Session, select
+from src.database.database import engine
+
 from passlib.context import CryptContext
+
+from .models import User
 
 # https://youtu.be/xZnOoO3ImSY?si=PSMb6FIW5YB39Dra
 class AuthHandler():
@@ -42,3 +47,17 @@ class AuthHandler():
     
     def auth_wrapper(self, auth: HTTPAuthorizationCredentials = Security(security)):
         return self.decode_token(auth.credentials)
+
+def get_user(username: str) -> User:
+    with Session(engine) as session:
+        statement = select(User).where(User.username == username)
+        return session.exec(statement).one()
+
+def create_user(username: str, password: str) -> int:
+    user = User(username=username, password=password)
+    with Session(engine) as session:
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user.id
+
