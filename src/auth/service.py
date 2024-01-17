@@ -1,5 +1,6 @@
 import os
 import jwt
+from typing import Optional
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
@@ -21,6 +22,7 @@ class AuthHandler():
         self.secret_key = os.environ.get("SECRET_KEY", "secret_12340987")
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         self.algorithm = os.environ.get("ALGORITHM", "HS256")
+        self.token_expiry_time_minutes = int(os.environ.get("TOKEN_EXPIRY_TIME_MINUTES", 15))
 
     def get_password_hash(self, password):
         return self.pwd_context.hash(password)
@@ -30,7 +32,7 @@ class AuthHandler():
     
     def encode_token(self, user_id):
         payload = {
-            "exp": datetime.utcnow() + timedelta(minutes=15),
+            "exp": datetime.utcnow() + timedelta(minutes=self.token_expiry_time_minutes),
             "iat": datetime.utcnow(),
             "sub": user_id
         }
@@ -48,10 +50,11 @@ class AuthHandler():
     def auth_wrapper(self, auth: HTTPAuthorizationCredentials = Security(security)):
         return self.decode_token(auth.credentials)
 
-def get_user(username: str) -> User:
+
+def get_user(username: str) -> Optional[User]:
     with Session(engine) as session:
         statement = select(User).where(User.username == username)
-        return session.exec(statement).one()
+        return session.exec(statement).first()
 
 def create_user(username: str, password: str) -> int:
     user = User(username=username, password=password)

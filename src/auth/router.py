@@ -1,7 +1,7 @@
-from fastapi import Depends, HTTPException, APIRouter, Request
+from fastapi import Depends, HTTPException, APIRouter
 
 from .schemas import AuthDetails
-from .service import AuthHandler
+from .service import AuthHandler, get_user, create_user
 
 router = APIRouter()
 auth_handler = AuthHandler()
@@ -10,29 +10,29 @@ auth_handler = AuthHandler()
 def register(auth_details: AuthDetails):
     print(auth_details.username, auth_details.password)
     
-    # TODO: check db for existing username here
-
+    selected_user = get_user(auth_details.username)
+    if selected_user:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    
     hashed_password = auth_handler.get_password_hash(auth_details.password)
+    user_id = create_user(auth_details.username, hashed_password)
 
-    # TODO: add user into db here
-
-    user = { "username": "fake", "password": "abc" }
-
-    token = auth_handler.encode_token(user["id"])
+    token = auth_handler.encode_token(user_id)
     return token
 
 
 @router.post("/login")
 def login(auth_details: AuthDetails):
-
-    # TODO: get user from db by username here
-    user = { "username": "fake", "password": "abc" }
-
-    if (not user) or (not auth_handler.verify_password(auth_details.password, user["password"])):
-        raise HTTPException(status_code=401, detail="Invalid username and/or password")
+    user = get_user(auth_details.username)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username")
+    
+    password_is_valid = auth_handler.verify_password(auth_details.password, user["password"])
+    if (not password_is_valid):
+        raise HTTPException(status_code=401, detail="Incorrect password")
+    
     token = auth_handler.encode_token(user["id"])
     return token
-
 
 
 @router.get('/unprotected')
@@ -40,5 +40,5 @@ def unprotected():
     return { 'hello': 'world' }
 
 @router.get('/protected')
-def protected(username=Depends(auth_handler.auth_wrapper)):
-    return { 'name': username }
+def protected(user_id=Depends(auth_handler.auth_wrapper)):
+    return
