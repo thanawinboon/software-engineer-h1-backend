@@ -19,5 +19,5 @@ def create_request(user: User, leave_request: LeaveRequest) -> int:
         session.add(request)
         session.commit()
         session.refresh(request)
-        return user.id
+        return request
 
