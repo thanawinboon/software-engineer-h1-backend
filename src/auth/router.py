@@ -18,7 +18,7 @@ def register(auth_details: AuthDetails):
     user_id = create_user(auth_details.username, hashed_password)
 
     token = auth_handler.encode_token(user_id)
-    return token
+    return { "token": token }
 
 
 @router.post("/login", status_code=200)
@@ -32,4 +32,4 @@ def login(auth_details: AuthDetails):
         raise HTTPException(status_code=401, detail="Incorrect password")
     
     token = auth_handler.encode_token(user.id)
-    return token
+    return { "token": token }
