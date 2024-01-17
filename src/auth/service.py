@@ -55,6 +55,11 @@ def get_user(username: str) -> Optional[User]:
     with Session(engine) as session:
         statement = select(User).where(User.username == username)
         return session.exec(statement).first()
+    
+def get_user_by_id(user_id: int) -> Optional[User]:
+    with Session(engine) as session:
+        statement = select(User).where(User.id == user_id)
+        return session.exec(statement).first()
 
 def create_user(username: str, password: str) -> int:
     user = User(username=username, password=password)
