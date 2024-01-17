@@ -21,7 +21,7 @@ def register(auth_details: AuthDetails):
     return token
 
 
-@router.post("/login")
+@router.post("/login", status_code=200)
 def login(auth_details: AuthDetails):
     user = get_user(auth_details.username)
     if not user:

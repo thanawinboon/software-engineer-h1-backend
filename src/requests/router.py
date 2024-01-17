@@ -2,13 +2,21 @@ from fastapi import Depends, HTTPException, APIRouter
 
 from src.auth.service import AuthHandler, get_user_by_id
 from .schemas import LeaveRequest
-from .service import create_request
+from .service import create_request, list_request
 
 router = APIRouter()
 auth_handler = AuthHandler()
 
-@router.post("/leave-request", status_code=201)
-def request(request_details: LeaveRequest, user_id=Depends(auth_handler.auth_wrapper)):
+@router.get("/list", status_code=200)
+def view_requests(user_id=Depends(auth_handler.auth_wrapper)):    
+    print(user_id)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    return list_request()
+
+@router.post("/send", status_code=201)
+def make_request(request_details: LeaveRequest, user_id=Depends(auth_handler.auth_wrapper)):
     print(request_details)
     
     selected_user = get_user_by_id(user_id)

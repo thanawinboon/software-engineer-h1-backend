@@ -6,7 +6,7 @@ from src.database.database import create_db_and_tables
 
 app = FastAPI()
 app.include_router(auth_router, prefix="/auth")
-app.include_router(requests_router)
+app.include_router(requests_router, prefix="/leave-request")
 
 create_db_and_tables()
 

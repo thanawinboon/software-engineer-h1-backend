@@ -1,5 +1,5 @@
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 
 from sqlmodel import Session, select
 from src.database.database import engine
@@ -21,3 +21,8 @@ def create_request(user: User, leave_request: LeaveRequest) -> int:
         session.refresh(request)
         return request
 
+def list_request():
+    with Session(engine) as session:
+        statement = select(Request)
+        return session.exec(statement).all()
+        
