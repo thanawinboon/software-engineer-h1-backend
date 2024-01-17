@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, APIRouter
+from fastapi import HTTPException, APIRouter
 
 from .schemas import AuthDetails
 from .service import AuthHandler, get_user, create_user
@@ -27,18 +27,9 @@ def login(auth_details: AuthDetails):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid username")
     
-    password_is_valid = auth_handler.verify_password(auth_details.password, user["password"])
+    password_is_valid = auth_handler.verify_password(auth_details.password, user.password)
     if (not password_is_valid):
         raise HTTPException(status_code=401, detail="Incorrect password")
     
-    token = auth_handler.encode_token(user["id"])
+    token = auth_handler.encode_token(user.id)
     return token
-
-
-@router.get('/unprotected')
-def unprotected():
-    return { 'hello': 'world' }
-
-@router.get('/protected')
-def protected(user_id=Depends(auth_handler.auth_wrapper)):
-    return
