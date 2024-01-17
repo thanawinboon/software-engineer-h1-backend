@@ -1,12 +1,12 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
-from datetime import datetime
+from datetime import date
 
 from src.auth.models import User
 
 class Request(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
-    leave_date: datetime
+    leave_date: date
     leave_duration: int
     reason: str
 
